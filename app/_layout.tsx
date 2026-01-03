@@ -9,14 +9,13 @@ import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { useColorScheme } from '@/components/useColorScheme';
-// Catch any errors thrown by the Layout component.
+import { useAuthInit } from '@/shared/hooks/useAuthInit';
+
 export { ErrorBoundary } from 'expo-router';
-// Ensure that reloading on `/modal` keeps a back button present.
 export const unstable_settings = {
   initialRouteName: '(tabs)',
 };
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -24,19 +23,19 @@ export default function RootLayout() {
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     ...FontAwesome.font,
   });
+  const { isInitialized } = useAuthInit();
 
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     if (error) throw error;
   }, [error]);
 
   useEffect(() => {
-    if (loaded) {
+    if (loaded && isInitialized) {
       SplashScreen.hideAsync();
     }
-  }, [loaded]);
+  }, [loaded, isInitialized]);
 
-  if (!loaded) {
+  if (!loaded || !isInitialized) {
     return null;
   }
 
@@ -51,7 +50,8 @@ function RootLayoutNav() {
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="course/[id]" options={{ title: 'Курс' }} />
+          <Stack.Screen name="filters" options={{ title: 'Фильтры' }} />
         </Stack>
       </ThemeProvider>
     </SafeAreaProvider>
