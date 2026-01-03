@@ -1,31 +1,27 @@
-import { StyleSheet } from 'react-native';
+import { Link } from 'expo-router';
+import { Pressable, Text, View } from 'react-native';
 
-import EditScreenInfo from '@/components/EditScreenInfo';
-import { Text, View } from '@/components/Themed';
+import { Page } from '@/components/Page';
 
-export default function TabOneScreen() {
+export default function HomeScreen() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Tab One</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/index.tsx" />
-    </View>
+    <Page hasHeader>
+      <View style={{ gap: 12 }}>
+        <Text style={{ fontSize: 20, fontWeight: '700' }}>Витрина курсов</Text>
+
+        <Link href="/filters" asChild>
+          <Pressable style={{ padding: 12, borderWidth: 1, borderRadius: 10 }}>
+            <Text>Открыть фильтры</Text>
+          </Pressable>
+        </Link>
+
+        <Link href="/course/1" asChild>
+          <Pressable style={{ padding: 12, borderWidth: 1, borderRadius: 14 }}>
+            <Text style={{ fontWeight: '700' }}>React Native: мобильные приложения</Text>
+            <Text>Открыть детальную (пример)</Text>
+          </Pressable>
+        </Link>
+      </View>
+    </Page>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
-  },
-});
