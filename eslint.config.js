@@ -14,8 +14,8 @@ const simpleImportSort = {
 
 module.exports = defineConfig([
   expoConfig,
-  prettierRecommended,
   simpleImportSort,
+  prettierRecommended,
   {
     ignores: [
       'node_modules/**',
