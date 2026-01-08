@@ -11,8 +11,10 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useMemo } from 'react';
+import { Platform } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { useBreakpoint } from '@/components/useBreakpoint';
 import { useColorScheme } from '@/components/useColorScheme';
 import { useAuthInit } from '@/shared/hooks/useAuthInit';
 import { useThemeStore } from '@/shared/store/theme.store';
@@ -54,6 +56,7 @@ export default function RootLayout() {
 function RootLayoutNav() {
   const systemColorScheme = useColorScheme();
   const { mode } = useThemeStore();
+  const { isPhone } = useBreakpoint();
 
   const getActiveColorScheme = () => {
     if (mode === 'system') {
@@ -86,8 +89,20 @@ function RootLayoutNav() {
         <NavigationThemeProvider value={navigationTheme}>
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="course/[id]" options={{ title: 'Курс' }} />
-            <Stack.Screen name="filters" options={{ title: 'Фильтры' }} />
+            <Stack.Screen
+              name="course/[id]"
+              options={() => ({
+                title: 'Курс',
+                headerShown: (Platform.OS === 'web' && isPhone) || Platform.OS !== 'web',
+              })}
+            />
+            <Stack.Screen
+              name="filters"
+              options={() => ({
+                title: 'Фильтры',
+                headerShown: (Platform.OS === 'web' && isPhone) || Platform.OS !== 'web',
+              })}
+            />
           </Stack>
         </NavigationThemeProvider>
       </ThemeProvider>

@@ -16,7 +16,7 @@ function DesktopWebStack() {
 }
 
 export default function TabsLayoutWeb() {
-  const { isPhone } = useBreakpoint({ phoneMax: 767 });
+  const { isPhone } = useBreakpoint();
 
   const isClient = useClientOnlyValue(false, true);
 

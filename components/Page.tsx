@@ -1,6 +1,6 @@
 import React from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Edges, SafeAreaView } from 'react-native-safe-area-context';
 
 import { spacing, useTheme } from '@/shared/theme';
 
@@ -9,9 +9,10 @@ import { Header } from './Header/Header';
 type Props = {
   children: React.ReactNode;
   hasHeader?: boolean;
+  hasTabs?: boolean;
 };
 
-export function Page({ children, hasHeader = false }: Props) {
+export function Page({ children, hasHeader = false, hasTabs = false }: Props) {
   const colors = useTheme();
 
   if (Platform.OS === 'web') {
@@ -23,10 +24,14 @@ export function Page({ children, hasHeader = false }: Props) {
     );
   }
 
+  const edges = ['left', 'right'];
+  if (!hasHeader) edges.push('top');
+  if (!hasTabs) edges.push('bottom');
+
   return (
     <SafeAreaView
       style={[styles.nativeOuter, { backgroundColor: colors.background.canvas }]}
-      edges={hasHeader ? ['left', 'right', 'bottom'] : undefined}
+      edges={edges as Edges}
     >
       <View style={styles.nativeInner}>{children}</View>
     </SafeAreaView>
@@ -42,7 +47,9 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 1200,
     alignSelf: 'center',
-    padding: spacing.lg,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    overflow: 'visible',
   },
   nativeOuter: {
     flex: 1,
@@ -51,6 +58,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
-    paddingBottom: spacing.lg,
+    overflow: 'visible',
   },
 });

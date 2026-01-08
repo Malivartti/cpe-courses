@@ -46,10 +46,9 @@ export default function ProfileScreen() {
   }
 
   return (
-    <Page hasHeader>
+    <Page hasHeader hasTabs>
       <Container maxWidth="md" centered>
         <View style={styles.content}>
-          {/* Карточка с информацией */}
           <Card>
             <InfoRow label="Имя" value={user.name} />
 
@@ -70,7 +69,6 @@ export default function ProfileScreen() {
             />
           </Card>
 
-          {/* Настройки темы */}
           <Card>
             <View style={styles.themeSection}>
               <Text variant="label" style={styles.themeLabel}>
@@ -80,7 +78,6 @@ export default function ProfileScreen() {
             </View>
           </Card>
 
-          {/* Кнопка выхода */}
           <Button
             title={isLoading ? 'Выход...' : 'Выйти'}
             variant="error"

@@ -44,7 +44,7 @@ export default function AuthScreen() {
   }
 
   return (
-    <Page hasHeader>
+    <Page hasHeader hasTabs>
       <Container maxWidth="sm" centered>
         <View style={styles.content}>
           <SegmentedControl

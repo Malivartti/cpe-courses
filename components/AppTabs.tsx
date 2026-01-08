@@ -3,14 +3,23 @@ import { Tabs } from 'expo-router';
 import React from 'react';
 
 import { useAuthStore } from '@/shared/store/auth.store';
+import { spacing } from '@/shared/theme';
 
 export function AppTabs() {
   const user = useAuthStore((state) => state.user);
-  const role = user?.role || 'guest';
+  const role = user?.role ?? 'guest';
   const isGuest = !user;
 
   return (
-    <Tabs screenOptions={{ headerTitleAlign: 'left', tabBarShowLabel: false }}>
+    <Tabs
+      screenOptions={{
+        headerTitleAlign: 'left',
+        tabBarShowLabel: false,
+        tabBarStyle: {
+          paddingTop: spacing.sm,
+        },
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
@@ -18,7 +27,6 @@ export function AppTabs() {
           tabBarIcon: ({ color }) => <FontAwesome size={22} name="th-large" color={color} />,
         }}
       />
-
       <Tabs.Screen
         name="enrollments"
         options={{
@@ -27,7 +35,6 @@ export function AppTabs() {
           tabBarIcon: ({ color }) => <FontAwesome size={22} name="bookmark" color={color} />,
         }}
       />
-
       <Tabs.Screen
         name="my-courses"
         options={{
@@ -36,16 +43,14 @@ export function AppTabs() {
           tabBarIcon: ({ color }) => <FontAwesome size={22} name="book" color={color} />,
         }}
       />
-
       <Tabs.Screen
         name="auth"
         options={{
-          title: 'Аккаунт',
+          title: 'Вход',
           href: isGuest ? '/auth' : null,
           tabBarIcon: ({ color }) => <FontAwesome size={22} name="sign-in" color={color} />,
         }}
       />
-
       <Tabs.Screen
         name="profile"
         options={{
