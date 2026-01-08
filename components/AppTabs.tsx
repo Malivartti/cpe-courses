@@ -10,17 +10,15 @@ export function AppTabs() {
   const isGuest = !user;
 
   return (
-    <Tabs screenOptions={{ headerTitleAlign: 'left' }}>
-      {/* Главная — видят все */}
+    <Tabs screenOptions={{ headerTitleAlign: 'left', tabBarShowLabel: false }}>
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Главная',
+          title: 'Курсы',
           tabBarIcon: ({ color }) => <FontAwesome size={22} name="th-large" color={color} />,
         }}
       />
 
-      {/* Мои записи — только user */}
       <Tabs.Screen
         name="enrollments"
         options={{
@@ -30,7 +28,6 @@ export function AppTabs() {
         }}
       />
 
-      {/* Мои курсы — только author */}
       <Tabs.Screen
         name="my-courses"
         options={{
@@ -40,7 +37,6 @@ export function AppTabs() {
         }}
       />
 
-      {/* Вход/Регистрация — только для гостей */}
       <Tabs.Screen
         name="auth"
         options={{
@@ -50,7 +46,6 @@ export function AppTabs() {
         }}
       />
 
-      {/* Профиль — только для авторизованных */}
       <Tabs.Screen
         name="profile"
         options={{

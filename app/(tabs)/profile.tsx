@@ -1,138 +1,112 @@
 import { router } from 'expo-router';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import { StyleSheet, View } from 'react-native';
 
 import { Page } from '@/components/Page';
+import { useBreakpoint } from '@/components/useBreakpoint';
+import { useProtectedRoute } from '@/shared/hooks/useProtectedRoute';
 import { useAuthStore } from '@/shared/store/auth.store';
+import { spacing } from '@/shared/theme';
+import {
+  Badge,
+  Button,
+  Card,
+  Container,
+  Divider,
+  InfoRow,
+  Text,
+  ThemeSelector,
+  useConfirm,
+} from '@/shared/ui';
 
 export default function ProfileScreen() {
+  const { isAllowed } = useProtectedRoute({ type: 'auth-only', redirectTo: '/auth' });
+
   const { user, logout, isLoading } = useAuthStore();
+  const { isPhone } = useBreakpoint();
+  const { confirm, dialog } = useConfirm();
 
   const handleLogout = async () => {
-    Alert.alert('Выход', 'Вы уверены, что хотите выйти?', [
-      { text: 'Отмена', style: 'cancel' },
+    confirm(
       {
-        text: 'Выйти',
-        style: 'destructive',
-        onPress: async () => {
-          await logout();
-          router.replace('/');
-        },
+        title: 'Выход',
+        message: 'Вы уверены, что хотите выйти?',
+        confirmText: 'Выйти',
+        cancelText: 'Отмена',
       },
-    ]);
+      async () => {
+        await logout();
+        router.replace('/');
+      }
+    );
   };
 
-  if (!user) {
+  if (!isAllowed || !user) {
     return null;
   }
 
   return (
     <Page hasHeader>
-      <View style={styles.container}>
-        <Text style={styles.title}>Профиль</Text>
+      <Container maxWidth="md" centered>
+        <View style={styles.content}>
+          {/* Карточка с информацией */}
+          <Card>
+            <InfoRow label="Имя" value={user.name} />
 
-        <View style={styles.card}>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Имя</Text>
-            <Text style={styles.value}>{user.name}</Text>
-          </View>
+            <Divider />
 
-          <View style={styles.divider} />
+            <InfoRow label="Email" value={user.email} />
 
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Email</Text>
-            <Text style={styles.value}>{user.email}</Text>
-          </View>
+            <Divider />
 
-          <View style={styles.divider} />
+            <InfoRow
+              label="Роль"
+              value={
+                <Badge
+                  label={user.role === 'user' ? 'Студент' : 'Автор'}
+                  variant={user.role === 'author' ? 'success' : 'primary'}
+                />
+              }
+            />
+          </Card>
 
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Роль</Text>
-            <View style={styles.roleBadge}>
-              <Text style={styles.roleText}>
-                {user.role === 'user' ? 'Пользователь' : 'Автор курсов'}
+          {/* Настройки темы */}
+          <Card>
+            <View style={styles.themeSection}>
+              <Text variant="label" style={styles.themeLabel}>
+                Тема приложения
               </Text>
+              <ThemeSelector />
             </View>
-          </View>
-        </View>
+          </Card>
 
-        <Pressable
-          style={[styles.logoutButton, isLoading && styles.buttonDisabled]}
-          onPress={handleLogout}
-          disabled={isLoading}
-        >
-          <Text style={styles.logoutButtonText}>
-            {isLoading ? 'Выход...' : 'Выйти из аккаунта'}
-          </Text>
-        </Pressable>
-      </View>
+          {/* Кнопка выхода */}
+          <Button
+            title={isLoading ? 'Выход...' : 'Выйти'}
+            variant="error"
+            onPress={handleLogout}
+            disabled={isLoading}
+            style={isPhone ? undefined : styles.logoutButton}
+          />
+        </View>
+      </Container>
+
+      {dialog}
     </Page>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    gap: 24,
-    paddingTop: 16,
+  content: {
+    gap: spacing.xl,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-    marginBottom: 8,
+  themeSection: {
+    gap: spacing.md,
   },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 12,
-  },
-  label: {
-    fontSize: 15,
-    color: '#666',
-    fontWeight: '500',
-  },
-  value: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000',
-  },
-  divider: {
-    height: 1,
-    backgroundColor: '#e0e0e0',
-  },
-  roleBadge: {
-    backgroundColor: '#2f95dc',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-  },
-  roleText: {
-    color: '#fff',
-    fontSize: 14,
+  themeLabel: {
     fontWeight: '600',
   },
   logoutButton: {
-    backgroundColor: '#e74c3c',
-    padding: 16,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginTop: 16,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  logoutButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    alignSelf: 'center',
   },
 });

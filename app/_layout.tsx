@@ -15,6 +15,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { useColorScheme } from '@/components/useColorScheme';
 import { useAuthInit } from '@/shared/hooks/useAuthInit';
+import { useThemeStore } from '@/shared/store/theme.store';
 import { ThemeProvider } from '@/shared/theme';
 import { darkColors } from '@/shared/theme/themes/dark';
 import { lightColors } from '@/shared/theme/themes/ligth';
@@ -51,8 +52,17 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const systemColorScheme = useColorScheme();
+  const { mode } = useThemeStore();
+
+  const getActiveColorScheme = () => {
+    if (mode === 'system') {
+      return systemColorScheme === 'dark' ? 'dark' : 'light';
+    }
+    return mode;
+  };
+
+  const isDark = getActiveColorScheme() === 'dark';
   const colors = isDark ? darkColors : lightColors;
 
   const navigationTheme: Theme = useMemo(

@@ -7,7 +7,7 @@ export const darkColors: ColorScheme = {
     secondary: palette.gray300,
     tertiary: palette.gray400,
     disabled: palette.gray600,
-    inverse: palette.gray950,
+    inverse: palette.white,
     link: palette.emerald400,
     success: palette.green400,
     error: palette.red400,

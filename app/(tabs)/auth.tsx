@@ -1,13 +1,18 @@
 import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { Page } from '@/components/Page';
+import { useProtectedRoute } from '@/shared/hooks/useProtectedRoute';
 import { useAuthStore } from '@/shared/store/auth.store';
+import { spacing } from '@/shared/theme';
+import { Button, Container, Input, RadioGroup, SegmentedControl } from '@/shared/ui';
 
 type Mode = 'login' | 'register';
 
 export default function AuthScreen() {
+  const { isAllowed } = useProtectedRoute({ type: 'guest-only', redirectTo: '/' });
+
   const [mode, setMode] = useState<Mode>('login');
   const [email, setEmail] = useState('user1@test.com');
   const [password, setPassword] = useState('password123');
@@ -21,7 +26,7 @@ export default function AuthScreen() {
       await login({ email, password });
       router.replace('/');
     } catch (error) {
-      Alert.alert('Ошибка', (error as Error).message);
+      alert((error as Error).message);
     }
   };
 
@@ -30,171 +35,96 @@ export default function AuthScreen() {
       await register({ email, password, name, role });
       router.replace('/');
     } catch (error) {
-      Alert.alert('Ошибка', (error as Error).message);
+      alert((error as Error).message);
     }
   };
 
+  if (!isAllowed) {
+    return null;
+  }
+
   return (
     <Page hasHeader>
-      <View style={styles.container}>
-        {/* Переключатель режимов */}
-        <View style={styles.modeSwitch}>
-          <Pressable
-            style={[styles.modeButton, mode === 'login' && styles.modeButtonActive]}
-            onPress={() => setMode('login')}
-          >
-            <Text style={[styles.modeText, mode === 'login' && styles.modeTextActive]}>Вход</Text>
-          </Pressable>
-          <Pressable
-            style={[styles.modeButton, mode === 'register' && styles.modeButtonActive]}
-            onPress={() => setMode('register')}
-          >
-            <Text style={[styles.modeText, mode === 'register' && styles.modeTextActive]}>
-              Регистрация
-            </Text>
-          </Pressable>
+      <Container maxWidth="sm" centered>
+        <View style={styles.content}>
+          <SegmentedControl
+            options={[
+              { value: 'login', label: 'Вход' },
+              { value: 'register', label: 'Регистрация' },
+            ]}
+            value={mode}
+            onChange={(value) => setMode(value as Mode)}
+          />
+
+          {mode === 'login' && (
+            <>
+              <Input
+                placeholder="Email"
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+              />
+
+              <Input
+                placeholder="Пароль"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+              />
+
+              <Button
+                title={isLoading ? 'Вход...' : 'Войти'}
+                onPress={handleLogin}
+                disabled={isLoading}
+              />
+            </>
+          )}
+
+          {mode === 'register' && (
+            <>
+              <Input placeholder="Имя" value={name} onChangeText={setName} />
+
+              <Input
+                placeholder="Email"
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+              />
+
+              <Input
+                placeholder="Пароль"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+              />
+
+              <RadioGroup
+                label="Роль"
+                options={[
+                  { value: 'user', label: 'Студент' },
+                  { value: 'author', label: 'Автор' },
+                ]}
+                value={role}
+                onChange={(value) => setRole(value as 'user' | 'author')}
+              />
+
+              <Button
+                title={isLoading ? 'Регистрация...' : 'Зарегистрироваться'}
+                onPress={handleRegister}
+                disabled={isLoading}
+              />
+            </>
+          )}
         </View>
-
-        {/* Форма входа */}
-        {mode === 'login' && (
-          <>
-            <Text style={styles.hint}>
-              Тестовые данные:{'\n'}user@test.com / 123456{'\n'}author@test.com / 123456
-            </Text>
-
-            <TextInput
-              style={styles.input}
-              placeholder="Email"
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Пароль"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-            />
-
-            <Pressable
-              style={[styles.button, isLoading && styles.buttonDisabled]}
-              onPress={handleLogin}
-              disabled={isLoading}
-            >
-              <Text style={styles.buttonText}>{isLoading ? 'Загрузка...' : 'Войти'}</Text>
-            </Pressable>
-          </>
-        )}
-
-        {/* Форма регистрации */}
-        {mode === 'register' && (
-          <>
-            <TextInput style={styles.input} placeholder="Имя" value={name} onChangeText={setName} />
-            <TextInput
-              style={styles.input}
-              placeholder="Email"
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Пароль"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-            />
-
-            <View style={styles.roleContainer}>
-              <Text style={styles.label}>Роль:</Text>
-              <Pressable
-                style={[styles.roleButton, role === 'user' && styles.roleButtonActive]}
-                onPress={() => setRole('user')}
-              >
-                <Text style={role === 'user' && styles.roleTextActive}>Пользователь</Text>
-              </Pressable>
-              <Pressable
-                style={[styles.roleButton, role === 'author' && styles.roleButtonActive]}
-                onPress={() => setRole('author')}
-              >
-                <Text style={role === 'author' && styles.roleTextActive}>Автор</Text>
-              </Pressable>
-            </View>
-
-            <Pressable
-              style={[styles.button, isLoading && styles.buttonDisabled]}
-              onPress={handleRegister}
-              disabled={isLoading}
-            >
-              <Text style={styles.buttonText}>{isLoading ? 'Загрузка...' : 'Создать аккаунт'}</Text>
-            </Pressable>
-          </>
-        )}
-      </View>
+      </Container>
     </Page>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { gap: 16, paddingTop: 24 },
-  modeSwitch: {
-    flexDirection: 'row',
-    borderRadius: 8,
-    backgroundColor: '#f0f0f0',
-    padding: 4,
-    marginBottom: 8,
+  content: {
+    gap: spacing.lg,
   },
-  modeButton: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: 'center',
-    borderRadius: 6,
-  },
-  modeButtonActive: {
-    backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  modeText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#666',
-  },
-  modeTextActive: {
-    color: '#2f95dc',
-  },
-  hint: { fontSize: 12, color: '#666', marginBottom: 8 },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-  },
-  roleContainer: { flexDirection: 'row', gap: 8, alignItems: 'center' },
-  label: { fontSize: 16, fontWeight: '600' },
-  roleButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-  },
-  roleButtonActive: { backgroundColor: '#2f95dc', borderColor: '#2f95dc' },
-  roleTextActive: { color: '#fff' },
-  button: {
-    backgroundColor: '#2f95dc',
-    padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  buttonDisabled: { opacity: 0.6 },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
 });

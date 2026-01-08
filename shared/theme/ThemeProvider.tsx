@@ -1,6 +1,7 @@
-import React, { createContext, ReactNode, useContext } from 'react';
+import React, { createContext, ReactNode, useContext, useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 
+import { useThemeStore } from '../store/theme.store';
 import { darkColors } from './themes/dark';
 import { lightColors } from './themes/ligth';
 
@@ -13,8 +14,21 @@ type ThemeProviderProps = {
 };
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
-  const colorScheme = useColorScheme();
-  const colors = colorScheme === 'dark' ? darkColors : lightColors;
+  const systemColorScheme = useColorScheme();
+  const { mode, loadMode } = useThemeStore();
+
+  useEffect(() => {
+    loadMode();
+  }, [loadMode]);
+
+  const getActiveColorScheme = () => {
+    if (mode === 'system') {
+      return systemColorScheme === 'dark' ? 'dark' : 'light';
+    }
+    return mode;
+  };
+
+  const colors = getActiveColorScheme() === 'dark' ? darkColors : lightColors;
 
   return <ThemeContext.Provider value={colors}>{children}</ThemeContext.Provider>;
 }
