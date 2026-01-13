@@ -3,9 +3,9 @@ import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
 
-import { useCoursesStore } from '@/shared/store/courses.store';
+import { useCoursesStore } from '@/shared/store/courses';
 import { spacing, useTheme } from '@/shared/theme';
-import { CourseSortField } from '@/shared/types/course';
+import { CourseSortField } from '@/shared/types/course_old';
 import { SearchInput, Text } from '@/shared/ui';
 
 import { FilterChips } from './CourseFilters/FilterChips';
@@ -22,7 +22,7 @@ interface CoursesHeaderProps {
 
 export function CoursesHeader({ isVisible = true }: CoursesHeaderProps) {
   const colors = useTheme();
-  const { filters, setFilters, sort, setSort } = useCoursesStore();
+  const { filter, setFilter } = useCoursesStore();
   const [showSortMenu, setShowSortMenu] = useState(false);
 
   useEffect(() => {
@@ -32,7 +32,7 @@ export function CoursesHeader({ isVisible = true }: CoursesHeaderProps) {
   }, [isVisible, showSortMenu]);
 
   const handleSearch = (search: string) => {
-    setFilters({ ...filters, search });
+    setFilter({ ...filter, search });
   };
 
   const handleOpenFilters = () => {
@@ -40,14 +40,14 @@ export function CoursesHeader({ isVisible = true }: CoursesHeaderProps) {
   };
 
   const handleSort = (field: CourseSortField) => {
-    if (sort.field === field) {
-      if (sort.order === 'asc') {
-        setSort({ field, order: 'desc' });
+    if (filter.sortField === field) {
+      if (filter.sortOrder === 'asc') {
+        setFilter({ sortField: field, sortOrder: 'desc' });
       } else {
-        setSort({ field: 'none', order: 'asc' });
+        setFilter({ sortField: 'none', sortOrder: 'asc' });
       }
     } else {
-      setSort({ field, order: 'asc' });
+      setFilter({ sortField: field, sortOrder: 'asc' });
     }
   };
 
@@ -60,15 +60,15 @@ export function CoursesHeader({ isVisible = true }: CoursesHeaderProps) {
   };
 
   const getSortButtonIcon = () => {
-    if (sort.field === 'none') {
+    if (filter.sortField === 'none') {
       return 'sort';
     }
-    const option = sortOptions.find((opt) => opt.field === sort.field);
+    const option = sortOptions.find((opt) => opt.field === filter.sortField);
     return option?.icon || 'sort';
   };
 
   const sortButtonIcon = getSortButtonIcon();
-  const isDefaultSort = sort.field === 'none' && sort.order === 'asc';
+  const isDefaultSort = filter.sortField === 'none' && filter.sortOrder === 'asc';
 
   return (
     <>
@@ -82,7 +82,7 @@ export function CoursesHeader({ isVisible = true }: CoursesHeaderProps) {
         <View style={styles.topRow}>
           <View style={styles.searchInput}>
             <SearchInput
-              value={filters.search ?? ''}
+              value={filter.search ?? ''}
               onChangeText={handleSearch}
               placeholder="Поиск курсов..."
             />
@@ -101,7 +101,7 @@ export function CoursesHeader({ isVisible = true }: CoursesHeaderProps) {
               ]}
               onPress={toggleSortMenu}
             >
-              {!isDefaultSort && sort.order === 'desc' && (
+              {!isDefaultSort && filter.sortOrder === 'desc' && (
                 <FontAwesome
                   name="arrow-down"
                   size={10}
@@ -114,7 +114,7 @@ export function CoursesHeader({ isVisible = true }: CoursesHeaderProps) {
                 size={18}
                 color={isDefaultSort ? colors.text.primary : colors.primary.default}
               />
-              {!isDefaultSort && sort.order === 'asc' && (
+              {!isDefaultSort && filter.sortOrder === 'asc' && (
                 <FontAwesome
                   name="arrow-up"
                   size={10}
@@ -144,8 +144,9 @@ export function CoursesHeader({ isVisible = true }: CoursesHeaderProps) {
             ]}
           >
             {sortOptions.map((option) => {
-              const isActive = sort.field === option.field;
-              const showDirection = isActive && !(option.field === 'none' && sort.order === 'asc');
+              const isActive = filter.sortField === option.field;
+              const showDirection =
+                isActive && !(option.field === 'none' && filter.sortOrder === 'asc');
 
               return (
                 <Pressable
@@ -175,7 +176,7 @@ export function CoursesHeader({ isVisible = true }: CoursesHeaderProps) {
                   </Text>
                   {showDirection && (
                     <FontAwesome
-                      name={sort.order === 'asc' ? 'arrow-up' : 'arrow-down'}
+                      name={filter.sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'}
                       size={14}
                       color={colors.primary.default}
                     />

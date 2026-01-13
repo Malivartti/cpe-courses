@@ -1,96 +1,177 @@
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { shadows, spacing, useTheme } from '@/shared/theme';
-import { CoursePreview } from '@/shared/types/course';
-import { Badge, Text } from '@/shared/ui';
+import {
+  getCourseFormatLabel,
+  getCourseStatusLabel,
+  getEducationFormatLabel,
+} from '@/shared/api/labels/courseLabels';
+import { useAuthStore } from '@/shared/store/auth';
+import { useCoursesStore } from '@/shared/store/courses';
+import { spacing, useTheme } from '@/shared/theme';
+import { Course } from '@/shared/types/course';
+import { Badge, Button, Card, Text, useConfirm } from '@/shared/ui';
 
 interface CourseCardProps {
-  course: CoursePreview;
+  course: Course;
 }
 
 export function CourseCard({ course }: CourseCardProps) {
   const colors = useTheme();
+  const { confirm, dialog } = useConfirm();
+  const { deleteCourse } = useCoursesStore();
+  const user = useAuthStore((state) => state.user);
+  const isAdmin = user?.role === 'admin';
 
-  const actualPrice = course.discountPrice || course.price;
-  const hasDiscount = course.discountPrice !== undefined;
+  const hasDiscount =
+    course.discountedPrice !== null &&
+    course.discountedPrice !== undefined &&
+    course.discountedPrice < (course.price ?? 0);
+
+  const formatDate = (isoDate: string) => {
+    const [year, month, day] = isoDate.split('T')[0].split('-');
+    return `${day}.${month}.${year}`;
+  };
+
+  const handleDelete = () => {
+    confirm(
+      {
+        title: 'Удаление курса',
+        message: `Удалить курс «${course.title}»?`,
+        confirmText: 'Удалить',
+        cancelText: 'Отмена',
+      },
+      async () => {
+        await deleteCourse(course.id);
+      }
+    );
+  };
 
   return (
-    <Link href={`/course/${course.id}`} asChild>
-      <Pressable style={{ ...styles.card, backgroundColor: colors.background.surface }}>
-        <View style={styles.header}>
-          <Text variant="h4" numberOfLines={2} style={styles.title}>
-            {course.title}
-          </Text>
-          <View style={styles.badges}>
-            <Badge label={course.direction.name} variant="primary" />
-            {hasDiscount && <Badge label="Скидка" variant="success" />}
-          </View>
-        </View>
-
-        <Text variant="body" numberOfLines={3} style={{ color: colors.text.secondary }}>
-          {course.description}
-        </Text>
-
-        <View style={styles.footer}>
-          <View style={styles.info}>
-            <Text variant="caption" style={{ color: colors.text.tertiary }}>
-              {course.duration} часов • {course.format.name}
-            </Text>
+    <>
+      <Card style={styles.card}>
+        <View style={styles.topRow}>
+          <View style={styles.tagsRow}>
+            {course.categories?.slice(0, 3).map((category) => (
+              <Badge key={category.id} label={category.name} variant="primary" />
+            ))}
+            {course.tags?.slice(0, 5).map((tag, i) => (
+              <Badge key={i} label={tag} variant="secondary" />
+            ))}
           </View>
 
           <View style={styles.priceContainer}>
-            {hasDiscount && (
-              <Text
-                variant="bodySmall"
-                style={{
-                  color: colors.text.tertiary,
-                  textDecorationLine: 'line-through',
-                }}
-              >
-                {course.price.toLocaleString('ru-RU')} ₽
-              </Text>
+            {hasDiscount ? (
+              <>
+                <Text
+                  variant="bodySmall"
+                  style={{
+                    textDecorationLine: 'line-through',
+                    color: colors.text.tertiary,
+                    textAlign: 'right',
+                  }}
+                >
+                  {course.price.toLocaleString('ru-RU')} ₽
+                </Text>
+                <Text variant="h4" style={{ color: colors.primary.default }}>
+                  {course.discountedPrice?.toLocaleString('ru-RU')} ₽
+                </Text>
+              </>
+            ) : (
+              <Text variant="h4">{course.price} ₽</Text>
             )}
-            <Text variant="h4" style={{ color: colors.primary.default }}>
-              {actualPrice.toLocaleString('ru-RU')} ₽
-            </Text>
           </View>
         </View>
-      </Pressable>
-    </Link>
+
+        <Link href={`/courses/${course.id}`} asChild>
+          <Pressable>
+            <Text variant="h3" numberOfLines={2}>
+              {course.title}
+            </Text>
+
+            {course.description && (
+              <Text variant="bodySmall" numberOfLines={3} style={{ color: colors.text.secondary }}>
+                {course.description}
+              </Text>
+            )}
+          </Pressable>
+        </Link>
+
+        <View style={styles.middleRow}>
+          <Badge label={getCourseFormatLabel(course.format)} variant="outline" />
+          <Badge label={getEducationFormatLabel(course.educationType)} variant="outline" />
+          {course.duration && <Badge label={`${course.duration} ч`} variant="outline" />}
+          {course.startDate && (
+            <Badge label={`Старт: ${formatDate(course.startDate)}`} variant="outline" />
+          )}
+        </View>
+
+        {isAdmin && (
+          <View style={styles.adminRow}>
+            <Badge
+              label={getCourseStatusLabel(course.status)}
+              variant={course.isPublished ? 'success' : 'warning'}
+            />
+
+            <View style={styles.adminActions}>
+              <Button
+                title="Редактировать"
+                variant="secondary"
+                size="sm"
+                onPress={() => router.push(`/courses/${course.id}/edit`)}
+              />
+              <Button title="Удалить" variant="error" size="sm" onPress={handleDelete} />
+            </View>
+          </View>
+        )}
+      </Card>
+
+      {dialog}
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: spacing.md,
-    padding: spacing.lg,
-    gap: spacing.md,
-    ...shadows.md,
-  },
-  header: {
     gap: spacing.sm,
   },
-  title: {
+
+  topRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: spacing.md,
+  },
+
+  tagsRow: {
+    flexDirection: 'row',
+    gap: spacing.xs,
+    flexWrap: 'wrap',
     flex: 1,
   },
-  badges: {
+
+  priceContainer: {
+    alignItems: 'flex-end',
+  },
+
+  middleRow: {
     flexDirection: 'row',
     gap: spacing.sm,
     flexWrap: 'wrap',
+    marginTop: spacing.xs,
   },
-  footer: {
+
+  adminRow: {
+    marginTop: spacing.sm,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    marginTop: spacing.sm,
+    alignItems: 'center',
+    gap: spacing.md,
   },
-  info: {
-    flex: 1,
-  },
-  priceContainer: {
-    alignItems: 'flex-end',
-    gap: spacing.xs,
+
+  adminActions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
   },
 });

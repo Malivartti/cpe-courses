@@ -1,22 +1,22 @@
 import { StyleSheet, View } from 'react-native';
 
-import { useCoursesStore } from '@/shared/store/courses.store';
+import { useCoursesStore } from '@/shared/store/courses';
 import { spacing } from '@/shared/theme';
 import { Input, Text } from '@/shared/ui';
 
 import { CollapsibleFilterSection } from './CollapsibleFilterSection';
 
 export function PriceRangeFilter() {
-  const { filters, setFilters } = useCoursesStore();
+  const { filter, setFilter } = useCoursesStore();
 
   const handleMinChange = (value: string) => {
     const num = parseInt(value) || undefined;
-    setFilters({ ...filters, priceMin: num });
+    setFilter({ ...filter, priceMin: num });
   };
 
   const handleMaxChange = (value: string) => {
     const num = parseInt(value) || undefined;
-    setFilters({ ...filters, priceMax: num });
+    setFilter({ ...filter, priceMax: num });
   };
 
   return (
@@ -28,7 +28,7 @@ export function PriceRangeFilter() {
           </Text>
           <Input
             placeholder="0"
-            value={filters.priceMin?.toString() || ''}
+            value={filter.priceMin?.toString() || ''}
             onChangeText={handleMinChange}
             keyboardType="numeric"
           />
@@ -39,7 +39,7 @@ export function PriceRangeFilter() {
           </Text>
           <Input
             placeholder="∞"
-            value={filters.priceMax?.toString() || ''}
+            value={filter.priceMax?.toString() || ''}
             onChangeText={handleMaxChange}
             keyboardType="numeric"
           />

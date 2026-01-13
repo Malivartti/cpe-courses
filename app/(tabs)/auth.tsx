@@ -4,9 +4,9 @@ import { StyleSheet, View } from 'react-native';
 
 import { Page } from '@/components/Page';
 import { useProtectedRoute } from '@/shared/hooks/useProtectedRoute';
-import { useAuthStore } from '@/shared/store/auth.store';
-import { spacing } from '@/shared/theme';
-import { Button, Container, Input, RadioGroup, SegmentedControl } from '@/shared/ui';
+import { useAuthStore } from '@/shared/store/auth';
+import { spacing, useTheme } from '@/shared/theme';
+import { Button, Container, Input, SegmentedControl, Text } from '@/shared/ui';
 
 type Mode = 'login' | 'register';
 
@@ -14,29 +14,25 @@ export default function AuthScreen() {
   const { isAllowed } = useProtectedRoute({ type: 'guest-only', redirectTo: '/' });
 
   const [mode, setMode] = useState<Mode>('login');
-  const [email, setEmail] = useState('user1@test.com');
-  const [password, setPassword] = useState('password123');
-  const [name, setName] = useState('');
-  const [role, setRole] = useState<'user' | 'author'>('user');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
 
-  const { login, register, isLoading } = useAuthStore();
+  const colors = useTheme();
+  const { login, register, isLoading, error, clearError } = useAuthStore();
 
   const handleLogin = async () => {
     try {
-      await login({ email, password });
+      await login({ username: email, password });
       router.replace('/');
-    } catch (error) {
-      alert((error as Error).message);
-    }
+    } catch (error) {}
   };
 
   const handleRegister = async () => {
     try {
-      await register({ email, password, name, role });
+      await register({ email, username, password });
       router.replace('/');
-    } catch (error) {
-      alert((error as Error).message);
-    }
+    } catch (error) {}
   };
 
   if (!isAllowed) {
@@ -53,8 +49,17 @@ export default function AuthScreen() {
               { value: 'register', label: 'Регистрация' },
             ]}
             value={mode}
-            onChange={(value) => setMode(value as Mode)}
+            onChange={(value) => {
+              setMode(value as Mode);
+              clearError();
+            }}
           />
+
+          {error && (
+            <View style={[styles.errorContainer, { backgroundColor: colors.error.subtle }]}>
+              <Text style={{ color: colors.error.default }}>{error}</Text>
+            </View>
+          )}
 
           {mode === 'login' && (
             <>
@@ -83,7 +88,7 @@ export default function AuthScreen() {
 
           {mode === 'register' && (
             <>
-              <Input placeholder="Имя" value={name} onChangeText={setName} />
+              <Input placeholder="Имя пользователя" value={username} onChangeText={setUsername} />
 
               <Input
                 placeholder="Email"
@@ -98,16 +103,6 @@ export default function AuthScreen() {
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
-              />
-
-              <RadioGroup
-                label="Роль"
-                options={[
-                  { value: 'user', label: 'Студент' },
-                  { value: 'author', label: 'Автор' },
-                ]}
-                value={role}
-                onChange={(value) => setRole(value as 'user' | 'author')}
               />
 
               <Button
@@ -126,5 +121,11 @@ export default function AuthScreen() {
 const styles = StyleSheet.create({
   content: {
     gap: spacing.lg,
+  },
+  errorContainer: {
+    padding: spacing.md,
+    borderRadius: spacing.sm,
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
 });

@@ -3,7 +3,7 @@ import { Link } from 'expo-router';
 import React from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 
-import { useAuthStore } from '@/shared/store/auth.store';
+import { useAuthStore } from '@/shared/store/auth';
 import { spacing, useTheme } from '@/shared/theme';
 import { Text } from '@/shared/ui';
 
@@ -20,7 +20,8 @@ export function Header() {
   }
 
   const isGuest = !user;
-  const isAuthor = user?.role === 'author';
+  const isAdmin = user?.role === 'admin';
+  const isUser = user?.role === 'user';
 
   return (
     <View
@@ -37,15 +38,15 @@ export function Header() {
           <Pressable style={styles.logo}>
             <FontAwesome name="graduation-cap" size={24} color={colors.primary.default} />
             <Text variant="h4" style={{ color: colors.text.primary }}>
-              Курсы
+              Витрина курсов
             </Text>
           </Pressable>
         </Link>
 
         <View style={styles.nav}>
-          {!isGuest && <NavLink href="/enrollments" icon="bookmark" label="Мои записи" />}
+          {isUser && <NavLink href="/enrollments" icon="bookmark" label="Мои записи" />}
 
-          {isAuthor && <NavLink href="/my-courses" icon="book" label="Мои курсы" />}
+          {isAdmin && <NavLink href="/dictionaries" icon="book" label="Справочники" />}
 
           {isGuest ? (
             <NavLink href="/auth" icon="sign-in" label="Войти" />

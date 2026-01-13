@@ -1,7 +1,7 @@
 import React from 'react';
 import { FlatList, NativeScrollEvent, NativeSyntheticEvent, StyleSheet, View } from 'react-native';
 
-import { useCoursesStore } from '@/shared/store/courses.store';
+import { useCoursesStore } from '@/shared/store/courses';
 import { spacing } from '@/shared/theme';
 import { Button, Text } from '@/shared/ui';
 
@@ -13,7 +13,7 @@ interface CourseListProps {
 }
 
 export function CourseList({ onScroll, headerHeight = 0 }: CourseListProps) {
-  const { courses, isLoading, hasMore, nextPage } = useCoursesStore();
+  const { courses, isLoading, pagination, loadMoreCourses } = useCoursesStore();
 
   return (
     <FlatList
@@ -38,11 +38,11 @@ export function CourseList({ onScroll, headerHeight = 0 }: CourseListProps) {
         ) : null
       }
       ListFooterComponent={
-        hasMore ? (
+        courses.length && pagination.hasMore ? (
           <Button
             title={isLoading ? 'Загрузка...' : 'Загрузить ещё'}
             variant="secondary"
-            onPress={nextPage}
+            onPress={loadMoreCourses}
             disabled={isLoading}
           />
         ) : null

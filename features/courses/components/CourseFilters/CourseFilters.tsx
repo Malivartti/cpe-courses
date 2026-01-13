@@ -10,10 +10,10 @@ import { PriceRangeFilter } from './PriceRangeFilter';
 export function CourseFilters() {
   return (
     <View style={styles.filter}>
-      <FilterSection type="directions" title="Направление" />
+      <FilterSection type="categories" title="Категории" />
+      <FilterSection type="tags" title="Теги" />
       <FilterSection type="formats" title="Формат обучения" />
-      <FilterSection type="educationTypes" title="Вид образования" />
-      <FilterSection type="locations" title="Площадки" />
+      <FilterSection type="educationTypes" title="Тип обучения" />
       <PriceRangeFilter />
       <DurationRangeFilter />
     </View>

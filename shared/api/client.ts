@@ -1,7 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
-const API_BASE_URL = __DEV__ ? 'http://localhost:3000/api' : 'https://api.example.com';
+import { AuthTokens } from '../types/user';
+
+const API_BASE_URL = 'https://cpe-courses-api.grebennikov.su/';
 
 export const ACCESS_TOKEN_LABEL = 'accessToken';
 export const REFRESH_TOKEN_LABEL = 'refreshToken';
@@ -36,6 +38,14 @@ const processQueue = (error: AxiosError | null, token: string | null = null) => 
 
 apiClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
+    if (config.url?.includes('/auth/login') || config.url?.includes('/auth/refresh')) {
+      return config;
+    }
+
+    if (config.headers?.Authorization) {
+      return config;
+    }
+
     const token = await AsyncStorage.getItem(ACCESS_TOKEN_LABEL);
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -71,14 +81,24 @@ apiClient.interceptors.response.use(
         const refreshToken = await AsyncStorage.getItem(REFRESH_TOKEN_LABEL);
         if (!refreshToken) throw new Error('No refresh token');
 
-        const { data } = await apiClient.post('/auth/refresh', { refreshToken });
-        const { accessToken } = data;
+        const { data } = await apiClient.post<AuthTokens>(
+          '/auth/refresh',
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${refreshToken}`,
+            },
+          }
+        );
 
-        await AsyncStorage.setItem(ACCESS_TOKEN_LABEL, accessToken);
-        processQueue(null, accessToken);
+        await AsyncStorage.multiSet([
+          [ACCESS_TOKEN_LABEL, data.access_token],
+          [REFRESH_TOKEN_LABEL, data.refresh_token],
+        ]);
 
+        processQueue(null, data.access_token);
         if (originalRequest.headers) {
-          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+          originalRequest.headers.Authorization = `Bearer ${data.access_token}`;
         }
         return apiClient(originalRequest);
       } catch (refreshError) {

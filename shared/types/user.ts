@@ -1,26 +1,24 @@
-export type UserRole = 'guest' | 'user' | 'author';
+export type Role = 'user' | 'admin';
 
 export type User = {
   id: string;
   email: string;
-  name: string;
-  role: UserRole;
-  avatar?: string;
+  username: string;
+  role: Role;
 };
 
 export type AuthTokens = {
-  accessToken: string;
-  refreshToken: string;
+  access_token: string;
+  refresh_token: string;
 };
 
 export type LoginRequest = {
-  email: string;
+  username: string; // email
   password: string;
 };
 
 export type RegisterRequest = {
   email: string;
+  username: string;
   password: string;
-  name: string;
-  role?: 'user' | 'author';
 };

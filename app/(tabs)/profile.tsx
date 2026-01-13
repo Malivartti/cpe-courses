@@ -5,7 +5,7 @@ import { StyleSheet, View } from 'react-native';
 import { Page } from '@/components/Page';
 import { useBreakpoint } from '@/components/useBreakpoint';
 import { useProtectedRoute } from '@/shared/hooks/useProtectedRoute';
-import { useAuthStore } from '@/shared/store/auth.store';
+import { useAuthStore } from '@/shared/store/auth';
 import { spacing } from '@/shared/theme';
 import {
   Badge,
@@ -50,7 +50,7 @@ export default function ProfileScreen() {
       <Container maxWidth="md" centered>
         <View style={styles.content}>
           <Card>
-            <InfoRow label="Имя" value={user.name} />
+            <InfoRow label="Имя" value={user.username} />
 
             <Divider />
 
@@ -62,8 +62,8 @@ export default function ProfileScreen() {
               label="Роль"
               value={
                 <Badge
-                  label={user.role === 'user' ? 'Студент' : 'Автор'}
-                  variant={user.role === 'author' ? 'success' : 'primary'}
+                  label={user.role === 'user' ? 'Студент' : 'Админ'}
+                  variant={user.role === 'admin' ? 'success' : 'primary'}
                 />
               }
             />
@@ -83,7 +83,6 @@ export default function ProfileScreen() {
             variant="error"
             onPress={handleLogout}
             disabled={isLoading}
-            style={isPhone ? undefined : styles.logoutButton}
           />
         </View>
       </Container>
@@ -102,8 +101,5 @@ const styles = StyleSheet.create({
   },
   themeLabel: {
     fontWeight: '600',
-  },
-  logoutButton: {
-    alignSelf: 'center',
   },
 });

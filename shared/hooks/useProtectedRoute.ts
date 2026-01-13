@@ -1,14 +1,14 @@
 import { Href, router } from 'expo-router';
 import { useEffect } from 'react';
 
-import { useAuthStore } from '../store/auth.store';
-import { UserRole } from '../types/user';
+import { useAuthStore } from '../store/auth';
+import { Role } from '../types/user';
 
 type ProtectionType = 'guest-only' | 'auth-only' | 'role';
 
 interface ProtectOptions {
   type: ProtectionType;
-  allowedRoles?: UserRole[];
+  allowedRoles?: Role[];
   redirectTo?: Href;
 }
 

@@ -2,21 +2,21 @@ import { router } from 'expo-router';
 import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
-import { useCoursesStore } from '@/shared/store/courses.store';
+import { useCoursesStore } from '@/shared/store/courses';
 import { spacing } from '@/shared/theme';
 import { Button } from '@/shared/ui';
 
 import { CourseFilters } from './CourseFilters/CourseFilters';
 
 export function CourseFiltersModal() {
-  const { resetFilters } = useCoursesStore();
+  const { resetFilter } = useCoursesStore();
 
   const handleApply = () => {
     router.back();
   };
 
   const handleReset = () => {
-    resetFilters();
+    resetFilter();
   };
 
   return (

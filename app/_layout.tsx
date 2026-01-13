@@ -90,9 +90,23 @@ function RootLayoutNav() {
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen
-              name="course/[id]"
+              name="courses/[id]"
               options={() => ({
                 title: 'Курс',
+                headerShown: (Platform.OS === 'web' && isPhone) || Platform.OS !== 'web',
+              })}
+            />
+            <Stack.Screen
+              name="courses/create"
+              options={() => ({
+                title: 'Создание курса',
+                headerShown: (Platform.OS === 'web' && isPhone) || Platform.OS !== 'web',
+              })}
+            />
+            <Stack.Screen
+              name="courses/[id]/edit"
+              options={() => ({
+                title: 'Редактирование курса',
                 headerShown: (Platform.OS === 'web' && isPhone) || Platform.OS !== 'web',
               })}
             />

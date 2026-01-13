@@ -2,52 +2,52 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { useCoursesStore } from '@/shared/store/courses.store';
+import { getCourseFormatLabel } from '@/shared/api/labels/courseLabels';
+import { useCoursesStore } from '@/shared/store/courses';
+import { useFiltersDataStore } from '@/shared/store/filters';
 import { spacing, useTheme } from '@/shared/theme';
 import { Text } from '@/shared/ui';
 
 export function FilterChips() {
   const colors = useTheme();
-  const { filters, dictionaries, setFilters } = useCoursesStore();
+  const { filter, setFilter } = useCoursesStore();
+  const { categories } = useFiltersDataStore();
 
   const chips: { label: string; onRemove: () => void }[] = [];
 
-  if (filters.directionIds && dictionaries) {
-    filters.directionIds.forEach((id) => {
-      const dir = dictionaries.directions.find((d) => d.id === id);
-      if (dir) {
+  if (filter.categoryIds) {
+    filter.categoryIds.forEach((id) => {
+      const category = categories.find((c) => c.id === id);
+      if (category) {
         chips.push({
-          label: dir.name,
+          label: category.name,
           onRemove: () =>
-            setFilters({
-              ...filters,
-              directionIds: filters.directionIds!.filter((i) => i !== id),
+            setFilter({
+              ...filter,
+              categoryIds: filter.categoryIds!.filter((i) => i !== id),
             }),
         });
       }
     });
   }
 
-  if (filters.formatIds && dictionaries) {
-    filters.formatIds.forEach((id) => {
-      const format = dictionaries.formats.find((f) => f.id === id);
-      if (format) {
-        chips.push({
-          label: format.name,
-          onRemove: () =>
-            setFilters({
-              ...filters,
-              formatIds: filters.formatIds!.filter((i) => i !== id),
-            }),
-        });
-      }
+  if (filter.formats) {
+    filter.formats.forEach((format) => {
+      chips.push({
+        label: getCourseFormatLabel(format),
+        onRemove: () =>
+          setFilter({
+            ...filter,
+            formats: filter.formats!.filter((f) => f !== format),
+          }),
+      });
     });
   }
 
-  if (filters.hasDiscount) {
+  if (filter.hasDiscount) {
     chips.push({
       label: 'Со скидкой',
-      onRemove: () => setFilters({ ...filters, hasDiscount: undefined }),
+      onRemove: () => setFilter({ ...filter, hasDiscount: undefined }),
     });
   }
 
@@ -58,7 +58,10 @@ export function FilterChips() {
       {chips.map((chip, index) => (
         <Pressable
           key={index}
-          style={[styles.chip, { backgroundColor: colors.primary.subtle }]}
+          style={{
+            ...styles.chip,
+            backgroundColor: colors.primary.subtle,
+          }}
           onPress={chip.onRemove}
         >
           <Text variant="caption" style={{ color: colors.primary.default }}>

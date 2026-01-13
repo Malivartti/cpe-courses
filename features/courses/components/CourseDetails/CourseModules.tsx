@@ -3,26 +3,28 @@ import React, { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { spacing, useTheme } from '@/shared/theme';
-import { CourseDetails } from '@/shared/types/course';
+import { Course } from '@/shared/types/course';
 import { Card, Text } from '@/shared/ui';
 
 interface CourseModulesProps {
-  course: CourseDetails;
+  course: Course;
 }
 
 export function CourseModules({ course }: CourseModulesProps) {
   const colors = useTheme();
-  const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
 
-  if (!course.modules || course.modules.length === 0) return null;
+  if (!course.sections || course.sections.length === 0) {
+    return null;
+  }
 
-  const toggleModule = (moduleId: string) => {
-    setExpandedModules((prev) => {
+  const toggleSection = (sectionId: string) => {
+    setExpandedSections((prev) => {
       const newSet = new Set(prev);
-      if (newSet.has(moduleId)) {
-        newSet.delete(moduleId);
+      if (newSet.has(sectionId)) {
+        newSet.delete(sectionId);
       } else {
-        newSet.add(moduleId);
+        newSet.add(sectionId);
       }
       return newSet;
     });
@@ -31,28 +33,33 @@ export function CourseModules({ course }: CourseModulesProps) {
   return (
     <Card>
       <Text variant="h3" style={styles.title}>
-        Модули курса
+        Программа курса
       </Text>
       <View>
-        {course.modules.map((module) => {
-          const isExpanded = expandedModules.has(module.id);
-
+        {course.sections.map((section) => {
+          const isExpanded = expandedSections.has(section.id);
           return (
-            <View key={module.id} style={styles.moduleContainer}>
-              <Pressable style={[styles.moduleHeader]} onPress={() => toggleModule(module.id)}>
-                <Text variant="body" style={styles.moduleTitle}>
-                  {module.order}. {module.title}
-                </Text>
+            <View key={section.id} style={styles.sectionContainer}>
+              <Pressable style={styles.sectionHeader} onPress={() => toggleSection(section.id)}>
+                <View style={{ flex: 1 }}>
+                  <Text variant="body" style={styles.sectionTitle}>
+                    {section.order}. {section.name}
+                  </Text>
+                  {section.hours && (
+                    <Text variant="caption" style={{ color: colors.text.tertiary }}>
+                      {section.hours} часов
+                    </Text>
+                  )}
+                </View>
                 <FontAwesome
                   name={isExpanded ? 'chevron-up' : 'chevron-down'}
                   size={16}
                   color={colors.text.tertiary}
                 />
               </Pressable>
-
-              {isExpanded && (
-                <View style={styles.moduleContent}>
-                  <Text variant="body">{module.description}</Text>
+              {isExpanded && section.description && (
+                <View style={styles.sectionContent}>
+                  <Text variant="body">{section.description}</Text>
                 </View>
               )}
             </View>
@@ -67,22 +74,23 @@ const styles = StyleSheet.create({
   title: {
     marginBottom: spacing.md,
   },
-  moduleContainer: {
+  sectionContainer: {
     borderRadius: spacing.sm,
     overflow: 'hidden',
+    marginBottom: spacing.sm,
   },
-  moduleHeader: {
+  sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: spacing.sm,
-    borderRadius: spacing.sm,
+    gap: spacing.md,
   },
-  moduleTitle: {
-    flex: 1,
+  sectionTitle: {
     fontWeight: '600',
   },
-  moduleContent: {
+  sectionContent: {
     paddingHorizontal: spacing.md,
+    paddingBottom: spacing.md,
   },
 });

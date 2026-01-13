@@ -1,12 +1,13 @@
 import { Link, Stack } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
+import { Page } from '@/components/Page';
 import { Text } from '@/shared/ui/Text';
 
 export default function NotFoundScreen() {
   return (
-    <>
-      <Stack.Screen options={{ title: 'Упс!' }} />
+    <Page hasHeader>
+      <Stack.Screen options={{ headerShown: false }} />
       <View style={styles.container}>
         <Text variant="h3" style={styles.title}>
           Страница не найдена
@@ -15,7 +16,7 @@ export default function NotFoundScreen() {
           <Text variant="link">Вернуться на главный экран</Text>
         </Link>
       </View>
-    </>
+    </Page>
   );
 }
 

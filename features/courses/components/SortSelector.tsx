@@ -2,10 +2,10 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
-import { useCoursesStore } from '@/shared/store/courses.store';
+import { useCoursesStore } from '@/shared/store/courses';
 import { spacing, useTheme } from '@/shared/theme';
-import { CourseSortField } from '@/shared/types/course';
-import { Text } from '@/shared/ui';
+import { CourseSortField } from '@/shared/types/course_old';
+import { SearchInput, Text } from '@/shared/ui';
 
 const sortOptions: { value: CourseSortField; label: string }[] = [
   { value: 'title', label: 'Название' },
@@ -15,20 +15,20 @@ const sortOptions: { value: CourseSortField; label: string }[] = [
 
 export function SortSelector() {
   const colors = useTheme();
-  const { sort, setSort } = useCoursesStore();
+  const { filter, setFilter } = useCoursesStore();
 
   const handleSortChange = (field: CourseSortField) => {
-    if (sort.field !== field) {
-      setSort({ field, order: 'asc' });
+    if (filter.sortField !== field) {
+      setFilter({ sortField: field, sortOrder: 'asc' });
       return;
     }
 
-    if (sort.order === 'asc') {
-      setSort({ field, order: 'desc' });
+    if (filter.sortOrder === 'asc') {
+      setFilter({ sortField: field, sortOrder: 'desc' });
       return;
     }
 
-    setSort({ field: 'none', order: 'desc' });
+    setFilter({ sortField: 'none', sortOrder: 'desc' });
   };
 
   return (
@@ -38,7 +38,11 @@ export function SortSelector() {
         { backgroundColor: colors.background.surface, borderColor: colors.border.light },
       ]}
     >
-      <Text variant="h4">Сортировка</Text>
+      <SearchInput
+        value={filter.search ?? ''}
+        onChangeText={(search: string) => setFilter({ ...filter, search })}
+        placeholder="Поиск курсов..."
+      />
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -46,8 +50,8 @@ export function SortSelector() {
         style={styles.scrollView}
       >
         {sortOptions.map((option) => {
-          const isActive = sort.field === option.value;
-          const isAsc = isActive && sort.order === 'asc';
+          const isActive = filter.sortField === option.value;
+          const isAsc = isActive && filter.sortOrder === 'asc';
 
           return (
             <Pressable

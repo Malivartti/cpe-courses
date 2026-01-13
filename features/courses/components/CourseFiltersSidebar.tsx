@@ -21,7 +21,7 @@ export function CourseFiltersSidebar() {
         },
       ]}
     >
-      <Text variant="h3" style={styles.title}>
+      <Text variant="h4" style={styles.title}>
         Фильтры
       </Text>
       <ScrollView contentContainerStyle={styles.content} style={styles.scrollView}>

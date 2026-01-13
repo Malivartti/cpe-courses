@@ -1,0 +1,1 @@
+export { LecturersSection } from './LecturersSection';

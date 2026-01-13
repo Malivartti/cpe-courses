@@ -1,89 +1,62 @@
-export type CourseDirection = {
+export type CourseStatus = 'active' | 'enrolling' | 'archived' | 'draft';
+export type CourseFormat = 'online' | 'offline' | 'mixed';
+export type EducationFormat = 'group' | 'individual' | 'self_paced' | 'mentorled' | 'cohort';
+
+export type CertificateType = 'certificate' | 'diploma' | 'attestation' | 'none';
+
+export type Category = {
   id: string;
   name: string;
+  description: string | null;
 };
 
-export type CourseFormat = {
+export type Skill = {
   id: string;
   name: string;
+  description: string | null;
 };
 
-export type EducationType = {
+export type Lecturer = {
   id: string;
   name: string;
-};
-
-export type Location = {
-  id: string;
-  name: string;
-};
-
-export type Instructor = {
-  id: string;
-  fullName: string;
+  position: string | null;
+  bio: string | null;
   competencies: string[];
-  avatar?: string;
 };
 
-export type CourseModule = {
+export type CourseSection = {
   id: string;
-  title: string;
-  description: string;
+  name: string;
+  description: string | null;
   order: number;
+  hours: number | null;
 };
 
-export type CoursePreview = {
+export type Tag = {
+  id: string;
+  name: string;
+};
+
+export type Course = {
   id: string;
   title: string;
-  description: string;
+  description: string | null;
+  format: CourseFormat;
+  educationType: EducationFormat;
   duration: number;
   price: number;
-  discountPrice?: number;
-  direction: CourseDirection;
-  format: CourseFormat;
-  educationType: EducationType;
-  thumbnail?: string;
+  discountedPrice: number | null;
+  startDate: string | null;
+  endDate: string | null;
+  certificateType: CertificateType;
+  status: CourseStatus;
+  isPublished: boolean;
+  locations: string[];
+  categories: Category[];
+  tags: string[];
+  acquired_skills: Skill[];
+  lecturers: Lecturer[];
+  sections: CourseSection[];
   createdAt: string;
   updatedAt: string;
-};
-
-export type CourseDetails = CoursePreview & {
-  locations: Location[];
-  modules: CourseModule[];
-  instructors: Instructor[];
-  requirements?: string[];
-  outcomes?: string[];
-  startDate?: string;
-  endDate?: string;
-  maxStudents?: number;
-  currentStudents?: number;
-};
-
-export type CourseFilters = {
-  search?: string;
-  directionIds?: string[];
-  formatIds?: string[];
-  educationTypeIds?: string[];
-  locationIds?: string[];
-  priceMin?: number;
-  priceMax?: number;
-  durationMin?: number;
-  durationMax?: number;
-  hasDiscount?: boolean;
-};
-
-export type CourseSortField = 'title' | 'price' | 'duration' | 'none';
-export type CourseSortOrder = 'asc' | 'desc';
-
-export type CourseSortOptions = {
-  field: CourseSortField;
-  order: CourseSortOrder;
-};
-
-export type CoursesResponse = {
-  courses: CoursePreview[];
-  total: number;
-  page: number;
-  pageSize: number;
-  hasMore: boolean;
 };

@@ -2,7 +2,7 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Tabs } from 'expo-router';
 import React from 'react';
 
-import { useAuthStore } from '@/shared/store/auth.store';
+import { useAuthStore } from '@/shared/store/auth';
 import { spacing } from '@/shared/theme';
 
 export function AppTabs() {
@@ -36,11 +36,11 @@ export function AppTabs() {
         }}
       />
       <Tabs.Screen
-        name="my-courses"
+        name="dictionaries"
         options={{
-          title: 'Мои курсы',
-          href: role === 'author' ? '/my-courses' : null,
-          tabBarIcon: ({ color }) => <FontAwesome size={22} name="book" color={color} />,
+          title: 'Справочники',
+          href: role === 'admin' ? '/dictionaries' : null,
+          tabBarIcon: ({ color }) => <FontAwesome size={22} name="database" color={color} />,
         }}
       />
       <Tabs.Screen
