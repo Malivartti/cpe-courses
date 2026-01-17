@@ -6,7 +6,7 @@ import { fromAPICategory } from './normalizers/courseNormaliser';
 
 export const categoryApi = {
   async list(skip = 0, limit = 100): Promise<Category[]> {
-    const { data } = await apiClient.get<CategoryAPI[]>('/api/categories', {
+    const { data } = await apiClient.get<CategoryAPI[]>('/api/categories/', {
       params: { skip, limit },
     });
     return data.map(fromAPICategory);
@@ -22,7 +22,7 @@ export const categoryApi = {
       name: category.name,
       description: category.description,
     };
-    const { data } = await apiClient.post<IDResponse>('/api/categories', request);
+    const { data } = await apiClient.post<IDResponse>('/api/categories/', request);
     return data.id;
   },
 

@@ -6,7 +6,7 @@ import { fromAPISkill } from './normalizers/courseNormaliser';
 
 export const skillApi = {
   async list(skip = 0, limit = 100): Promise<Skill[]> {
-    const { data } = await apiClient.get<SkillAPI[]>('/api/skills', {
+    const { data } = await apiClient.get<SkillAPI[]>('/api/skills/', {
       params: { skip, limit },
     });
     return data.map(fromAPISkill);
@@ -22,7 +22,7 @@ export const skillApi = {
       name: skill.name,
       description: skill.description,
     };
-    const { data } = await apiClient.post<IDResponse>('/api/skills', request);
+    const { data } = await apiClient.post<IDResponse>('/api/skills/', request);
     return data.id;
   },
 

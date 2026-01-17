@@ -7,7 +7,7 @@ import { fromAPITag } from './normalizers/courseNormaliser';
 
 export const tagsApi = {
   async list(skip = 0, limit = 100): Promise<Tag[]> {
-    const { data } = await apiClient.get<TagAPI[]>('/api/tags', {
+    const { data } = await apiClient.get<TagAPI[]>('/api/tags/', {
       params: { skip, limit },
     });
     return data.map(fromAPITag);
@@ -22,7 +22,7 @@ export const tagsApi = {
     const request = {
       name: tag.name,
     };
-    const { data } = await apiClient.post<IDResponse>('/api/tags', request);
+    const { data } = await apiClient.post<IDResponse>('/api/tags/', request);
     return data.id;
   },
 

@@ -50,7 +50,7 @@ export const courseApi = {
       lecturer_ids: course.lecturers.map((lect) => lect.id),
     };
 
-    const { data } = await apiClient.post<IDResponse>('/api/courses', request);
+    const { data } = await apiClient.post<IDResponse>('/api/courses/', request);
     return data.id;
   },
 

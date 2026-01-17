@@ -6,7 +6,7 @@ import { fromAPILecturer } from './normalizers/courseNormaliser';
 
 export const lecturersApi = {
   async list(skip = 0, limit = 100): Promise<Lecturer[]> {
-    const { data } = await apiClient.get<LecturerAPI[]>('/api/lecturers', {
+    const { data } = await apiClient.get<LecturerAPI[]>('/api/lecturers/', {
       params: { skip, limit },
     });
     return data.map(fromAPILecturer);
@@ -25,7 +25,7 @@ export const lecturersApi = {
       photo_url: null,
       competencies: lecturer.competencies,
     };
-    const { data } = await apiClient.post<IDResponse>('/api/lecturers', request);
+    const { data } = await apiClient.post<IDResponse>('/api/lecturers/', request);
     return data.id;
   },
 
