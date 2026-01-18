@@ -44,6 +44,7 @@ export function CoursePricing({ course }: CoursePricingProps) {
       router.push('/auth');
       return;
     }
+    setFullName(user.username || '');
     setShowEnrollForm(true);
     clearError();
   };
