@@ -12,6 +12,7 @@ interface ConfirmDialogProps {
   message?: string;
   confirmText?: string;
   cancelText?: string;
+  style?: 'success' | 'danger';
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -22,6 +23,7 @@ export function ConfirmDialog({
   message,
   confirmText = 'Подтвердить',
   cancelText = 'Отмена',
+  style = 'danger',
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
@@ -52,7 +54,12 @@ export function ConfirmDialog({
               onPress={onCancel}
               style={styles.button}
             />
-            <Button title={confirmText} variant="error" onPress={onConfirm} style={styles.button} />
+            <Button
+              title={confirmText}
+              variant={style === 'danger' ? 'error' : 'primary'}
+              onPress={onConfirm}
+              style={styles.button}
+            />
           </View>
         </Pressable>
       </Pressable>

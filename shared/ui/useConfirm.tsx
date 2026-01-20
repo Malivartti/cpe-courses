@@ -7,12 +7,14 @@ export interface ConfirmOptions {
   message?: string;
   confirmText?: string;
   cancelText?: string;
+  style?: 'success' | 'danger';
 }
 
 export function useConfirm() {
   const [visible, setVisible] = useState(false);
   const [options, setOptions] = useState<ConfirmOptions>({
     title: '',
+    style: 'danger',
   });
   const [onConfirmCallback, setOnConfirmCallback] = useState<(() => void) | null>(null);
 
@@ -38,6 +40,7 @@ export function useConfirm() {
       message={options.message}
       confirmText={options.confirmText}
       cancelText={options.cancelText}
+      style={options.style}
       onConfirm={handleConfirm}
       onCancel={handleCancel}
     />

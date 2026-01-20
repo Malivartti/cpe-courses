@@ -8,15 +8,16 @@ type EnrollmentsState = {
   myEnrollments: EnrollmentReadModel[];
   isLoading: boolean;
   error: string | null;
-
-  enroll: (courseId: string, data: EnrollAuthenticatedRequest) => Promise<string>;
-
+  enroll: (
+    courseId: string,
+    data: EnrollAuthenticatedRequest,
+    userData: { user_id: string; email: string }
+  ) => Promise<string>;
   fetchMyEnrollments: (skip?: number, limit?: number) => Promise<void>;
-
   fetchEnrollments: (courseId: string, skip?: number, limit?: number) => Promise<void>;
-
   clearError: () => void;
   reset: () => void;
+  isEnrolledInCourse: (courseId: string) => boolean;
 };
 
 export const useEnrollmentsStore = create<EnrollmentsState>((set, get) => ({
@@ -25,14 +26,34 @@ export const useEnrollmentsStore = create<EnrollmentsState>((set, get) => ({
   isLoading: false,
   error: null,
 
-  enroll: async (courseId: string, data: EnrollAuthenticatedRequest) => {
+  enroll: async (
+    courseId: string,
+    data: EnrollAuthenticatedRequest,
+    userData: { user_id: string; email: string }
+  ) => {
     set({ isLoading: true, error: null });
     try {
       const enrollmentId = await enrollmentsApi.enroll(courseId, data);
-      set({ isLoading: false });
+
+      const newEnrollment: EnrollmentReadModel = {
+        enrollment_id: enrollmentId,
+        user_id: userData.user_id,
+        course_id: courseId,
+        full_name: data.full_name,
+        email: userData.email,
+        phone: data.phone || '',
+        message: data.message || '',
+        created_at: new Date().toISOString(),
+      };
+
+      set((state) => ({
+        myEnrollments: [...state.myEnrollments, newEnrollment],
+        isLoading: false,
+      }));
+
       return enrollmentId;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Не удалось записаться на курс';
+      const message = error instanceof Error ? error.message : 'Ошибка при записи';
       set({ error: message, isLoading: false });
       throw error;
     }
@@ -45,7 +66,7 @@ export const useEnrollmentsStore = create<EnrollmentsState>((set, get) => ({
       set({ myEnrollments: enrollments, isLoading: false });
     } catch (error) {
       set({
-        error: error instanceof Error ? error.message : 'Не удалось загрузить ваши записи',
+        error: error instanceof Error ? error.message : 'Ошибка при загрузке записей',
         isLoading: false,
       });
     }
@@ -58,19 +79,27 @@ export const useEnrollmentsStore = create<EnrollmentsState>((set, get) => ({
       set({ enrollments, isLoading: false });
     } catch (error) {
       set({
-        error: error instanceof Error ? error.message : 'Не удалось загрузить список записавшихся',
+        error: error instanceof Error ? error.message : 'Ошибка при загрузке записей',
         isLoading: false,
       });
     }
   },
 
-  clearError: () => set({ error: null }),
+  isEnrolledInCourse: (courseId: string): boolean => {
+    const { myEnrollments } = get();
+    return myEnrollments.some((e) => e.course_id === courseId);
+  },
 
-  reset: () =>
+  clearError: () => {
+    set({ error: null });
+  },
+
+  reset: () => {
     set({
       enrollments: [],
       myEnrollments: [],
       isLoading: false,
       error: null,
-    }),
+    });
+  },
 }));
