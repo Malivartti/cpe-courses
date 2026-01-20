@@ -3,17 +3,18 @@ import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
 
+import { useAuthStore } from '@/shared/store/auth';
 import { useCoursesStore } from '@/shared/store/courses';
 import { spacing, useTheme } from '@/shared/theme';
 import { CourseSortField } from '@/shared/types/course_old';
-import { SearchInput, Text } from '@/shared/ui';
+import { Button, SearchInput, Text } from '@/shared/ui';
 
 import { FilterChips } from './CourseFilters/FilterChips';
 
 const sortOptions: { field: CourseSortField; label: string; icon: string }[] = [
-  { field: 'title', label: 'Название', icon: 'font' },
-  { field: 'price', label: 'Цена', icon: 'rouble' },
-  { field: 'duration', label: 'Длительность', icon: 'clock-o' },
+  { field: 'title', label: 'По названию', icon: 'font' },
+  { field: 'price', label: 'По цене', icon: 'rouble' },
+  { field: 'duration', label: 'По длительности', icon: 'clock-o' },
 ];
 
 interface CoursesHeaderProps {
@@ -22,8 +23,22 @@ interface CoursesHeaderProps {
 
 export function CoursesHeader({ isVisible = true }: CoursesHeaderProps) {
   const colors = useTheme();
-  const { filter, setFilter } = useCoursesStore();
+  const user = useAuthStore((state) => state.user);
+  const isAdmin = user?.role === 'admin';
+
+  const {
+    filter,
+    setFilter,
+    searchMode,
+    searchQuery,
+    setSearchMode,
+    setSearchQuery,
+    performSearch,
+    isLoading,
+  } = useCoursesStore();
+
   const [showSortMenu, setShowSortMenu] = useState(false);
+  const [localQuery, setLocalQuery] = useState(searchQuery);
 
   useEffect(() => {
     if (!isVisible && showSortMenu) {
@@ -31,15 +46,23 @@ export function CoursesHeader({ isVisible = true }: CoursesHeaderProps) {
     }
   }, [isVisible, showSortMenu]);
 
-  const handleSearch = (search: string) => {
-    setFilter({ ...filter, search });
+  useEffect(() => {
+    setLocalQuery(searchQuery);
+  }, [searchQuery]);
+
+  const handleSearchSubmit = () => {
+    setSearchQuery(localQuery);
+    performSearch();
   };
 
   const handleOpenFilters = () => {
+    if (searchMode === 'recommendations') return;
     router.push('/filters');
   };
 
   const handleSort = (field: CourseSortField) => {
+    if (searchMode === 'recommendations') return;
+
     if (filter.sortField === field) {
       if (filter.sortOrder === 'asc') {
         setFilter({ sortField: field, sortOrder: 'desc' });
@@ -52,6 +75,7 @@ export function CoursesHeader({ isVisible = true }: CoursesHeaderProps) {
   };
 
   const toggleSortMenu = () => {
+    if (searchMode === 'recommendations') return;
     setShowSortMenu(!showSortMenu);
   };
 
@@ -59,16 +83,20 @@ export function CoursesHeader({ isVisible = true }: CoursesHeaderProps) {
     setShowSortMenu(false);
   };
 
+  const toggleSearchMode = () => {
+    const newMode = searchMode === 'standard' ? 'recommendations' : 'standard';
+    setSearchMode(newMode);
+  };
+
   const getSortButtonIcon = () => {
-    if (filter.sortField === 'none') {
-      return 'sort';
-    }
+    if (filter.sortField === 'none') return 'sort';
     const option = sortOptions.find((opt) => opt.field === filter.sortField);
     return option?.icon || 'sort';
   };
 
   const sortButtonIcon = getSortButtonIcon();
   const isDefaultSort = filter.sortField === 'none' && filter.sortOrder === 'asc';
+  const isRecommendations = searchMode === 'recommendations';
 
   return (
     <>
@@ -78,17 +106,21 @@ export function CoursesHeader({ isVisible = true }: CoursesHeaderProps) {
         </TouchableWithoutFeedback>
       )}
 
-      <View style={styles.container}>
-        <View style={styles.topRow}>
-          <View style={styles.searchInput}>
-            <SearchInput
-              value={filter.search ?? ''}
-              onChangeText={handleSearch}
-              placeholder="Поиск курсов..."
-            />
-          </View>
+      <View style={[styles.container, { backgroundColor: colors.background.surface }]}>
+        <View style={styles.searchRow}>
+          <SearchInput
+            value={localQuery}
+            onChangeText={setLocalQuery}
+            onSubmit={handleSearchSubmit}
+            placeholder={isRecommendations ? 'Опишите желаемый курс...' : 'Поиск курсов...'}
+            searchMode={searchMode}
+            onToggleMode={toggleSearchMode}
+            isLoading={isLoading}
+          />
+        </View>
 
-          <View style={styles.actions}>
+        <View style={styles.actionsRow}>
+          <View style={styles.leftActions}>
             <Pressable
               style={[
                 styles.iconButton,
@@ -97,9 +129,11 @@ export function CoursesHeader({ isVisible = true }: CoursesHeaderProps) {
                     ? colors.background.surface
                     : colors.primary.subtle,
                   borderColor: colors.border.default,
+                  opacity: isRecommendations ? 0.5 : 1,
                 },
               ]}
               onPress={toggleSortMenu}
+              disabled={isRecommendations}
             >
               {!isDefaultSort && filter.sortOrder === 'desc' && (
                 <FontAwesome
@@ -112,7 +146,7 @@ export function CoursesHeader({ isVisible = true }: CoursesHeaderProps) {
               <FontAwesome
                 name={sortButtonIcon as any}
                 size={18}
-                color={isDefaultSort ? colors.text.primary : colors.primary.default}
+                color={isDefaultSort ? colors.text.secondary : colors.primary.default}
               />
               {!isDefaultSort && filter.sortOrder === 'asc' && (
                 <FontAwesome
@@ -125,15 +159,29 @@ export function CoursesHeader({ isVisible = true }: CoursesHeaderProps) {
             </Pressable>
 
             <Pressable
-              style={[styles.iconButton, { backgroundColor: colors.primary.default }]}
+              style={[
+                styles.iconButton,
+                {
+                  backgroundColor: isRecommendations
+                    ? colors.background.surfaceElevated
+                    : colors.background.surface,
+                  borderColor: colors.border.default,
+                  opacity: isRecommendations ? 0.5 : 1,
+                },
+              ]}
               onPress={handleOpenFilters}
+              disabled={isRecommendations}
             >
-              <FontAwesome name="sliders" size={18} color={colors.text.inverse} />
+              <FontAwesome name="sliders" size={18} color={colors.text.secondary} />
             </Pressable>
           </View>
+
+          {isAdmin && (
+            <Button title="Создать курс" onPress={() => router.push('/courses/create')} />
+          )}
         </View>
 
-        {showSortMenu && (
+        {showSortMenu && !isRecommendations && (
           <View
             style={[
               styles.sortMenu,
@@ -145,24 +193,21 @@ export function CoursesHeader({ isVisible = true }: CoursesHeaderProps) {
           >
             {sortOptions.map((option) => {
               const isActive = filter.sortField === option.field;
-              const showDirection =
-                isActive && !(option.field === 'none' && filter.sortOrder === 'asc');
+              const showDirection = isActive && option.field !== 'none';
 
               return (
                 <Pressable
                   key={option.field}
                   style={[
                     styles.sortOption,
-                    isActive && {
-                      backgroundColor: colors.primary.subtle,
-                    },
+                    isActive && { backgroundColor: colors.primary.subtle },
                   ]}
                   onPress={() => handleSort(option.field)}
                 >
                   <FontAwesome
                     name={option.icon as any}
                     size={16}
-                    color={isActive ? colors.primary.default : colors.text.secondary}
+                    color={isActive ? colors.primary.default : colors.text.primary}
                   />
                   <Text
                     variant="body"
@@ -187,7 +232,7 @@ export function CoursesHeader({ isVisible = true }: CoursesHeaderProps) {
           </View>
         )}
 
-        <FilterChips />
+        {!isRecommendations && <FilterChips />}
       </View>
     </>
   );
@@ -205,29 +250,38 @@ const styles = StyleSheet.create({
   container: {
     gap: spacing.sm,
     zIndex: 10,
+    padding: spacing.sm,
+    borderRadius: spacing.md,
   },
-  topRow: {
+  searchRow: {
+    width: '100%',
+  },
+  actionsRow: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     gap: spacing.sm,
-    alignItems: 'stretch',
   },
-  searchInput: {
-    flex: 1,
-    minWidth: 0,
-  },
-  actions: {
+  leftActions: {
     flexDirection: 'row',
     gap: spacing.xs,
-    flexShrink: 0,
   },
   iconButton: {
     width: 50,
+    height: 50,
     borderRadius: spacing.sm,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: 'transparent',
     position: 'relative',
+    flexShrink: 0,
+  },
+  createButton: {
+    width: 50,
+    height: 50,
+    borderRadius: spacing.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
     flexShrink: 0,
   },
   directionIconSmall: {
@@ -246,5 +300,12 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
+  },
+  hint: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    padding: spacing.sm,
+    borderRadius: spacing.xs,
   },
 });

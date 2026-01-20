@@ -1,13 +1,5 @@
-import { router } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  Animated,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  Platform,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { Animated, NativeScrollEvent, NativeSyntheticEvent, StyleSheet, View } from 'react-native';
 
 import { Page } from '@/components/Page';
 import { useBreakpoint } from '@/components/useBreakpoint';
@@ -18,14 +10,14 @@ import { SortSelector } from '@/features/courses/components/SortSelector';
 import { useAuthStore } from '@/shared/store/auth';
 import { useCoursesStore } from '@/shared/store/courses';
 import { spacing } from '@/shared/theme';
-import { Button } from '@/shared/ui';
 
 export default function HomeScreen() {
   const { isDesktop, isPhone } = useBreakpoint();
-  const { loadCourses, setFilter } = useCoursesStore();
+  const { loadCourses, setFilter, searchMode } = useCoursesStore();
   const user = useAuthStore((state) => state.user);
   const isAdmin = user?.role === 'admin';
-  const header_height = 50 + spacing.lg + 50 * Number(isAdmin);
+
+  const header_height = 130 + spacing.lg + 30 * Number(searchMode === 'recommendations');
 
   const lastScrollY = useRef(0);
   const headerTranslateY = useRef(new Animated.Value(0)).current;
@@ -78,11 +70,6 @@ export default function HomeScreen() {
 
           <View style={styles.desktopContent}>
             <SortSelector />
-            {isAdmin && (
-              <View style={styles.adminActions}>
-                <Button title="Создать курс" onPress={() => router.push('/courses/create')} />
-              </View>
-            )}
             <CourseList />
           </View>
         </View>
@@ -98,28 +85,12 @@ export default function HomeScreen() {
               },
             ]}
           >
-            {isAdmin && (
-              <View style={styles.adminActionsMobile}>
-                <Button
-                  title="Создать курс"
-                  size="md"
-                  onPress={() => router.push('/courses/create')}
-                />
-              </View>
-            )}
             <CoursesHeader isVisible={headerVisible} />
           </Animated.View>
         </View>
       ) : (
         <View style={styles.tabletLayout}>
           <CoursesHeader />
-
-          {true && (
-            <View style={styles.adminActions}>
-              <Button title="Создать курс" onPress={() => router.push('/courses/create')} />
-            </View>
-          )}
-
           <CourseList />
         </View>
       )}
