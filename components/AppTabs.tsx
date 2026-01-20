@@ -23,7 +23,8 @@ export function AppTabs() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Курсы',
+          title: 'Витрина курсов',
+          tabBarLabel: 'Курсы',
           tabBarIcon: ({ color }) => <FontAwesome size={22} name="th-large" color={color} />,
         }}
       />

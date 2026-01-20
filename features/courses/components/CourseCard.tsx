@@ -165,6 +165,7 @@ const styles = StyleSheet.create({
   adminRow: {
     marginTop: spacing.sm,
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
     alignItems: 'center',
     gap: spacing.md,
