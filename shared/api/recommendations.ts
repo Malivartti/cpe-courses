@@ -31,7 +31,7 @@ export interface RecommendationsResponse {
 
 export const recommendationsApi = {
   async recommend(params: RecommendationsParams): Promise<RecommendationsResponse> {
-    const response = await apiClient.get<RecommendationsAPIResponse>('api/recommendations/', {
+    const response = await apiClient.get<RecommendationsAPIResponse>('/api/recommendations/', {
       params: {
         q: params.q,
         skip: params.skip ?? 0,
