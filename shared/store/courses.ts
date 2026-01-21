@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 import { courseApi } from '@/shared/api/courses';
-import { recommendationsApi } from '@/shared/api/recommendations';
+import { RecommendationNotice, recommendationsApi } from '@/shared/api/recommendations';
 import { Course } from '@/shared/types/course';
 import { CoursesFilter } from '@/shared/types/course_filters';
 import { SortField, SortOrder } from '@/shared/types/course_filters.api';
@@ -23,6 +23,7 @@ type CoursesState = {
   error: string | null;
   searchMode: SearchMode;
   searchQuery: string;
+  notices: RecommendationNotice[];
 
   loadCourses: () => Promise<void>;
   loadMoreCourses: () => Promise<void>;
@@ -79,6 +80,7 @@ export const useCoursesStore = create<CoursesState>((set, get) => ({
   error: null,
   searchMode: 'standard',
   searchQuery: '',
+  notices: [],
 
   loadCourses: async () => {
     const { filter, searchMode, searchQuery } = get();
@@ -94,6 +96,7 @@ export const useCoursesStore = create<CoursesState>((set, get) => ({
 
         set({
           courses: data.courses,
+          notices: data.notices,
           pagination: {
             skip: 0,
             limit: filter.limit ?? DEFAULT_LIMIT,
@@ -110,6 +113,7 @@ export const useCoursesStore = create<CoursesState>((set, get) => ({
 
         set({
           courses: data,
+          notices: [],
           pagination: {
             skip: 0,
             limit: filter.limit ?? DEFAULT_LIMIT,
@@ -143,6 +147,7 @@ export const useCoursesStore = create<CoursesState>((set, get) => ({
 
         set({
           courses: [...courses, ...data.courses],
+          notices: data.notices,
           pagination: {
             skip: newSkip,
             limit: pagination.limit,
